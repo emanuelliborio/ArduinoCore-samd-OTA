@@ -25,7 +25,8 @@
  */
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x00000000+0x2000, LENGTH = 0x00040000-0x2000 /* First 8KB used by bootloader */
+  /* Free space is divided into 2, in order to accommodate an update build, which would be copied by FlowerBoot to the execution area */    
+  FLASH (rx) : ORIGIN = 0x00000000+0x2000, LENGTH = (0x00040000-0x2000) / 2 /* First 8KB used by bootloader */
   RAM (rwx) : ORIGIN = 0x20000000, LENGTH = 0x00008000
 }
 
@@ -65,6 +66,11 @@ SECTIONS
 {
 	.text :
 	{
+		/* Place FlowerBoot code including the vector table at the beginning and align the rest of the app code (including its vector table) at 0x200 */
+		KEEP(*(.flower_boot))
+		. = ALIGN(0x200);
+		/* FlowerBoot end */
+		
 		KEEP(*(.isr_vector))
 		*(.text*)
 
